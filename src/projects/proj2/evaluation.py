@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import math, random
-from ...lib.game import discrete_soccer
+from ...lib.game import discrete_soccer, connect_four
 
 def soccer(state, player_id):
-    ## TODO: Implement this function!
+    # TODO: Implement this function!
     #
     # The soccer evaluation function *must* look into the game state
     # when running. It will then return a number, where the larger the
@@ -20,4 +20,6 @@ def soccer(state, player_id):
     pass
 
 def connect_four(state, player_id):
-    return 0
+    if not isinstance(state, connect_four.Connect4State):
+        raise ValueError("Evaluation function incompatible with game type.")
+    pass

@@ -173,7 +173,7 @@ class Connect4State(GameState):
         else:
             raise ValueError("get_range can only return horizontal, vertical and diagonal ranges.")
 
-    def has_connected_chain(self, check, length, x1, y1, x2, y2):
+    def chain_length(self, check, x1, y1, x2, y2):
         lst = self.get_range(x1, y1, x2, y2)
         max_length = 0
         current_length = 0
@@ -184,7 +184,7 @@ class Connect4State(GameState):
                 max_length = max(current_length, max_length)
             else:
                 current_length = 0
-        return max_length >= length
+        return max_length
 
     def _update_place_chip(self, x):
         state = self
@@ -197,10 +197,10 @@ class Connect4State(GameState):
         state = self
         y = len(state.board[x])-1
         player = state.board[x][y]
-        if self.has_connected_chain(player, self.connect_length, x, y-3, x, y) \
-           or self.has_connected_chain(player, self.connect_length, x-3, y, x+3, y) \
-           or self.has_connected_chain(player, self.connect_length, x-3, y-3, x+3, y+3) \
-           or self.has_connected_chain(player, self.connect_length, x+3, y-3, x-3, y+3):
+        if self.chain_length(player, x, y-3, x, y) >= self.connect_length \
+           or self.chain_length(player, x-3, y, x+3, y) >= self.connect_length \
+           or self.chain_length(player, x-3, y-3, x+3, y+3) >= self.connect_length \
+           or self.chain_length(player, x+3, y-3, x-3, y+3) >= self.connect_length:
             state = state.set(winner=player)
         return state
 

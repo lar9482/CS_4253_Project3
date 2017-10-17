@@ -64,8 +64,8 @@ class Game:
             turn_wait = 50
             round_wait = 100
         else:
-            turn_wait = 100
-            round_wait = 500
+            turn_wait = 500
+            round_wait = 1000
         while not state.is_terminal:
             new_state = None
             i = (i + 1) % len(self.agents)
