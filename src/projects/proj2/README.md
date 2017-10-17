@@ -28,7 +28,7 @@ method so that it returns the correct action given a GameState.
 
 Because we want our `MinimaxAgent` to be used for many kinds of games,
 you can only use the most general information about a game. Each game
-extends the [`GameState`](/src/lib/game/_game.py#L125) class; in
+extends the [`GameState`](/src/lib/game/_game.py#L135) class; in
 particular, we are given the following information:
 
 1. `state.num_players` The number of players in the game
