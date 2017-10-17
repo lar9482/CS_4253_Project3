@@ -18,9 +18,9 @@ For any help on additional commands to use, run
 
     python3 evaluate.py proj2 --help
 
-## Notes
+## Implementation notes
 
-### The Minimax Agent
+### The agent
 
 You will be extending the abstract [`Agent`](/src/lib/game/_game.py#L10)
 class specified in the game code. You will need to extend the `decide`
@@ -55,9 +55,11 @@ since `state.act` is not destructive, `state` is not changed by
     new_state != state ## This will evaluate to True
 
 The `GameState` class is implemented as a persistent data structure
-using [pyrsistent](https://github.com/tobgu/pyrsistent). This means
-that is is relatively just as good as regular mutable data structures,
-in comparison to naive copying.
+using [pyrsistent](https://github.com/tobgu/pyrsistent). That is,
+updates to immutable data structures (as copies) are faster than
+simple copies, but still relatively slower than mutable updates. For
+the purpose of this assignment, you should not have to be too
+concerned about the performance of immutable updates.
 
 ### The evaluation function
 
@@ -72,5 +74,5 @@ attention to:
 2. `state.players` Information about the location and state of each
    player on the field (indexed by the numeric player ID)
 
-Note that the evaluation function will be called many times, so make
-sure that it is semi-efficient.
+There are many helper functions provided in the `SoccerState` class,
+so it is worth reading their documentation.
