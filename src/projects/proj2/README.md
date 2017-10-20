@@ -105,7 +105,7 @@ further left or right at the edge of the field, they are given the
 additional option to move diagonally away from that edge. Players
 without the ball are not allowed to move out of bounds.
 
-Players with the ball can move out of bounds, but it results in a
+Players with the ball can move out of bounds (OOB), but it results in a
 penalty. When a player moves OOB in the y-direction, or when a player
 moves OOB near their goal, the game is reset with the opponent having
 the ball. If the player leaves OOB near the opponent's goal, the
