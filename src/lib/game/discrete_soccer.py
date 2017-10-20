@@ -14,6 +14,7 @@ MAX_KICK_DIST = 5
 class Action(Enum):
     KICK=1
     MOVE=2
+    CHANGE_STANCE=3
     def move(x, y):
         return (Action.MOVE, x, y)
 
@@ -28,19 +29,34 @@ class Team(IntEnum):
 
 
 class InteractiveAgent(Agent):
+    def __init__(self, evaluation_function=None):
+        self.evaluate = evaluation_function
+
     def decide(self, state):
+        if self.evaluate:
+            self.evaluate(state, state.current_player, True)
         while True:
             pygame.event.clear()
             event = pygame.event.wait()
             if event.type == pygame.KEYDOWN:
-                if event.key in [   pygame.K_UP, pygame.K_w, pygame.K_i]:
+                if event.key in [ pygame.K_w ]:
                     return Action.move(0, 1)
-                if event.key in [ pygame.K_DOWN, pygame.K_s, pygame.K_k]:
+                if event.key in [ pygame.K_x ]:
                     return Action.move(0, -1)
-                if event.key in [ pygame.K_LEFT, pygame.K_a, pygame.K_j]:
+                if event.key in [ pygame.K_a ]:
                     return Action.move(-1, 0)
-                if event.key in [pygame.K_RIGHT, pygame.K_d, pygame.K_l]:
+                if event.key in [ pygame.K_d ]:
                     return Action.move(1, 0)
+                if event.key in [ pygame.K_q ]:
+                    return Action.move(-1, 1)
+                if event.key in [ pygame.K_e ]:
+                    return Action.move(1, 1)
+                if event.key in [ pygame.K_z ]:
+                    return Action.move(-1, -1)
+                if event.key in [ pygame.K_c ]:
+                    return Action.move(1, -1)
+                if event.key in [ pygame.K_s ]:
+                    return Action.CHANGE_STANCE
                 if event.key == pygame.K_SPACE:
                     return Action.KICK
 
@@ -59,7 +75,8 @@ class DiscreteSoccer(GameType):
             agent=agent,
             team=Team.RED if i % 2 == 0 else Team.BLUE,
             x=0, y=0,
-            has_ball=False
+            has_ball=False,
+            stance=0
         ) for i, agent in enumerate(agents)])
         teams = m(
             red=v(*[p.index for p in players if p.team == Team.RED]),
@@ -113,14 +130,25 @@ class SoccerState(GameState):
     def actions(self):
         player = self.current_player_obj
         actions = []
-        dx = 1 if player.team == Team.RED else -1
         if player.has_ball:
-            actions = [Action.KICK, Action.move(1, 0), Action.move(-1, 0),
-                       Action.move(0, 1), Action.move(0, -1)]
+            actions += [Action.KICK]
+        # actions += [Action.CHANGE_STANCE]
+        dx = 1 if player.team == Team.RED else -1
+        actions += [
+            Action.move(1, 0), Action.move(-1, 0),
+            Action.move(0, 1), Action.move(0, -1)
+        ]
+
+        if x <= 1:
+            dx = 1
+        elif x >= self.pitch.width:
+            dx = -1
         else:
-            actions = [Action.move(dx, 0),
-                       Action.move(1, 1), Action.move(-1, 1),
-                       Action.move(1,-1), Action.move(-1,-1)]
+            dx = 1 if player.team == Team.RED else -1
+
+        actions += [
+            Action.move(dx, 1), Action.move(dx, -1)
+        ]
         return actions
 
     def reward(self, player_id):
@@ -129,13 +157,19 @@ class SoccerState(GameState):
         return 10 if self.winner == self.players[player_id].team else -10
 
     def act(self, action):
-        self._action_is_valid(action)
-
         player = self.current_player_obj
         state = self
 
+        state = state._action_is_valid(action)
+        if not state:
+            return None
+
         if action == Action.KICK:
             state = self._update_kick()
+        elif action == Action.CHANGE_STANCE:
+            state = state.transform(
+                self._cpk('stance'), (player.stance + 1) % 2
+            )
         elif isinstance(action, tuple) and action[0] == Action.MOVE:
             (_, dx, dy) = action
             state = self._update_move_to(player.x + dx, player.y + dy)
@@ -238,6 +272,10 @@ class SoccerState(GameState):
         """Returns the info for the current player in a PMap object."""
         return self.players[self.current_player]
 
+    @property
+    def player_with_ball(self):
+        return next([p for p in self.players if p.has_ball], None)
+
     def goal_pos(self, team):
         """Returns the position of the `teams`'s goal."""
         return self.red_goal_pos if team == Team.RED \
@@ -300,7 +338,7 @@ class SoccerState(GameState):
         state = self
         if player.has_ball:
             if y < 1 or y > state.pitch.height: ## sidelines
-                state = state._update_reset()
+                state = state._update_reset(prefer_side=player.team.inverse)
             elif x < 1 or x > self.pitch.width:
                 if self.goal_bottom <= y and y <= self.goal_top:
                     if x < 1:
@@ -308,7 +346,11 @@ class SoccerState(GameState):
                     else:
                         state = state.set(winner=Team.RED)
                 else:
-                    state = state._update_reset(prefer_side=player.team.inverse)
+                    if x < 1 and player.team == Team.RED \
+                       or x > self.pitch.width and player.team == Team.BLUE:
+                        state = state._update_corner_kick()
+                    else:
+                        state = state._update_reset(prefer_side=player.team.inverse)
             else:
                 ## deal with collision
                 (state, do_move) = state._update_check_collide(x, y)
@@ -328,28 +370,71 @@ class SoccerState(GameState):
                     state = state.transform(self._cpk('x'), x, self._cpk('y'), y)
         return state
 
-    def _update_kick(self):
-        """State update: Current player kicks towards opponent goal."""
-        player = self.current_player_obj
-        if not player.has_ball:
-            return None
+    def _update_corner_kick(self):
         state = self
-        (x, y) = (player.x + 0.5, player.y + 0.5)
-        goal_x = self.pitch.width + 1.5 if player.team == Team.RED else 0.5
+        p2 = self.player_with_ball
+
+        if not p2:
+            return state
+
+        goal_pos = self.goal_pos(team)
+        if p2.team == Team.RED:
+            p1 = self.teams['blue'][0]
+        else:
+            p1 = self.teams['red'][0]
+
+        state = state.transform(
+            ('players', p1.index, 'x'), goal_pos[0]+1,
+            ('players', p1.index, 'y'), 1,
+            ('players', p1.index, 'has_ball'), True
+            ('players', p2.index, 'x'), goal_pos[0]+3,
+            ('players', p2.index, 'y'), 3,
+            ('players', p2.index, 'has_ball'), False
+        )
+
+        return state
+
+    def is_goal(self, dist, angle):
+        return 20*abs(angle)**2/(dist**2) > 3e-1
+
+    def can_shoot_from(self, x, y, team):
+        (x, y) = (x + 0.5, y - 0.5)
+        goal_x = self.pitch.width + 2 if team == Team.RED else 0
         goal_y1 = int(self.pitch.height - self.pitch.goal_height) / 2
-        goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2 + 1
+        goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2
+        print(goal_y1, goal_y2)
         dx = goal_x - x
         dy1 = (goal_y1 - y)
         dy2 = (goal_y2 - y)
         norm1 = math.sqrt(dx**2 + dy1**2)
         norm2 = math.sqrt(dx**2 + dy2**2)
-        angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))
         dy = ((goal_y1+goal_y2)/2 - y)
+
+        dist = math.sqrt(dx**2 + dy**2)
+        angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))
+
+        return self.is_goal(dist, angle)
+
+    def check_kick(self, player):
+        (x, y) = (player.x + 0.5, player.y - 0.5)
+        goal_x = self.pitch.width + 1.5 if player.team == Team.RED else 0.5
+        goal_y1 = int(self.pitch.height - self.pitch.goal_height) / 2
+        goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2
+        dx = goal_x - x
+        dy1 = (goal_y1 - y)
+        dy2 = (goal_y2 - y)
+        norm1 = math.sqrt(dx**2 + dy1**2)
+        norm2 = math.sqrt(dx**2 + dy2**2)
+        dy = ((goal_y1+goal_y2)/2 - y)
+
         f_y1 = lambda obj_x: y + dy1 * obj_x
         f_y2 = lambda obj_x: y + dy2 * obj_x
 
+        dist = math.sqrt(dx**2 + dy**2)
+        angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))+0.1
+
         # Check for interceptions
-        intercept = (None, 10000)
+        intercept = (None, float("inf"))
         for obj in self.players:
             if obj.index == player.index: continue
             (obj_x, obj_y) = (obj.x + 0.5, obj.y + 0.5)
@@ -358,23 +443,28 @@ class SoccerState(GameState):
                 new_i = (obj, math.sqrt((x - obj_x)**2 + (y - obj_y)**2))
                 intercept = min([intercept, new_i], key=lambda x: x[1])
 
-        dist = math.sqrt(dx**2 + dy**2)
-        ddx = dx / dist
-        ddy = dy / dist
+        return (dist, angle, self.is_goal(dist, angle), intercept[0])
 
-        if intercept[0]:
-            (i_obj, i_dist) = intercept
-            state = state._update_switch_possession(player.index, i_obj.index)
-        elif angle**2/dist**2 < 3e-2:
-            state = state._update_reset(player.team.inverse)
-        else:
+    def _update_kick(self):
+        """State update: Current player kicks towards opponent goal."""
+        player = self.current_player_obj
+        state = self
+
+        (_, _, is_goal, intercept_player) = self.check_kick(player)
+
+        if intercept_player:
+            state = state._update_switch_possession(player.index, intercept_player.index)
+        elif is_goal:
+            goal_pos = self.goal_pos(player.team)
             state = state.transform(
-                ('ball', 'x'), int(x + dx),
-                ('ball', 'y'), int(y + dy),
+                ('ball', 'x'), goal_pos[0],
+                ('ball', 'y'), goal_pos[1],
                 ('ball', 'on_field'), True,
                 self._cpk('has_ball'), False
             )
-        state = state._update_check_goal()
+            state = state._update_check_goal()
+        else:
+            state = state._update_reset(prefer_side=player.team.inverse)
         return state
 
     def _update_switch_possession(self, player_a, player_b):
@@ -539,11 +629,16 @@ class SoccerState(GameState):
                 s1 = surf.subsurface((i * B, (self.pitch.height-j+1) * B, B, B))
                 if 1 <= i and i <= self.pitch.width and\
                    1 <= j and j <= self.pitch.height:
-                    s1.fill((0, 255, 0), (1, 1, B-2, B-2))
+                    if self.can_shoot_from(i, j, Team.RED) or self.can_shoot_from(i, j, Team.BLUE):
+                        s1.fill((100, 255, 100), (1, 1, B-2, B-2))
+                    else:
+                        s1.fill((0, 255, 0), (1, 1, B-2, B-2))
 
         # Draw field lines
         pygame.draw.lines(surf, (255, 255, 255), True,
                           [(B, B), (W-B,B), (W-B,H-B), (B, H-B)], 3)
+        pygame.draw.line(surf, (255, 255, 255), (int(W/2), B), (int(W/2), H-B), 3)
+        pygame.draw.line(surf, (255, 255, 255), (int(W/2), B), (int(W/2), H-B), 3)
         pygame.draw.line(surf, (255, 255, 255), (int(W/2), B), (int(W/2), H-B), 3)
         pygame.draw.circle(surf, (255, 255, 255), (int(W/2), int(H/2)), int(B*2.5), 3)
         pygame.draw.lines(surf, (255, 255, 255), False,
@@ -559,6 +654,8 @@ class SoccerState(GameState):
         # pygame.draw.circle(surf, (255, 255, 255), (W-B, int(H/2)), B*3, 3)
         # surf.fill(PITCH_COLOR, (0, 0, B-1, H))
         # surf.fill(PITCH_COLOR, (W-B+2, 0, B, H))
+        font = pygame.font.SysFont("monospace", 18)
+        font.set_bold(True)
 
         for i in range(self.pitch.width+2):
             for j in range(self.pitch.height+2):
@@ -568,9 +665,13 @@ class SoccerState(GameState):
                     s1.fill(BALL_COLOR, (6, 6, B-12, B-12))
                 elif obj and obj.type == 'player':
                     c = PLAYER_RED_COLOR if obj.team == Team.RED else PLAYER_BLUE_COLOR
+                    if obj.index == self.current_player:
+                        s1.fill((250, 250, 0))
                     s1.fill(c, (2, 2, B-4, B-4))
                     if obj.has_ball:
                         pygame.draw.rect(s1, BALL_COLOR, (6, 6, B-12, B-12))
+                    # label = font.render("R" if obj.stance == 0 else "B", 1, (0, 255, 0))
+                    # s1.blit(label, (B/4, B/4))
 
                 if (i < 1 or i > self.pitch.width) and \
                      (self.goal_bottom <= j and j <= self.goal_top):
@@ -584,13 +685,13 @@ class SoccerState(GameState):
                           [(0, GOAL_TOP), (B, GOAL_TOP), (B, GOAL_BOTTOM), (0, GOAL_BOTTOM)], 3)
         pygame.draw.lines(surf, (0, 0, 0), False,
                           [(W, GOAL_TOP), (W-B, GOAL_TOP), (W-B, GOAL_BOTTOM), (W, GOAL_BOTTOM)], 3)
+        pygame.draw.rect(surf, PLAYER_RED_COLOR, (0, 0, 6, surf.get_height()))
+        pygame.draw.rect(surf, PLAYER_BLUE_COLOR, (surf.get_width()-7, 0, 6, surf.get_height()))
 
         if self.is_terminal:
             winner_rect = ((1+self.pitch.width/2-3)*B, (self.pitch.height/2+2)*B,
                            6*B, 2*B)
             border_rect = (winner_rect[0]-4, winner_rect[1]-4, winner_rect[2]+8, winner_rect[3]+8)
-            font = pygame.font.SysFont("monospace", 18)
-            font.set_bold(True)
             label = None
             if self.winner == Team.RED:
                 label = font.render("Team  RED wins!", 1, (255, 255, 255))
@@ -609,5 +710,5 @@ class SoccerState(GameState):
 
     def __hash__(self):
         key = [self.current_player, (self.ball.x, self.ball.y)] \
-              + [(p.x, p.y, p.has_ball) for p in self.players]
+              + [(p.x, p.y, p.stance, p.has_ball) for p in self.players]
         return hash(tuple(key))

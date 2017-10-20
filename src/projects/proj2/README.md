@@ -76,3 +76,65 @@ attention to:
 
 There are many helper functions provided in the `SoccerState` class,
 so it is worth reading their documentation.
+
+## Game Description
+
+For constructing the evaluation function, you will need to understand
+how the Discrete Soccer game works. We will describe the basic rules
+of the game below.
+
+The game runs until a single goal is made. There are no time
+restrictions on a single game.
+
+You may notice that some games will end without either player shooting
+a goal. Since minimax is a deterministic algorithm, if a state in the
+game is repeated, then that implies that the game will loop infinitely
+with those players. We reset the game when this scenario happens.
+
+### Initialization
+
+Each player begins at a random position on their side of the
+field. The ball starts directly in the center of the field for every
+game.
+
+### Movement
+
+Players without the ball can move either up, down, left, right, or
+diagonally towards their opponent's goal. When a player cannot move
+further left or right at the edge of the field, they are given the
+additional option to move diagonally away from that edge. Players
+without the ball are not allowed to move out of bounds.
+
+Players with the ball can move out of bounds, but it results in a
+penalty. When a player moves OOB in the y-direction, or when a player
+moves OOB near their goal, the game is reset with the opponent having
+the ball. If the player leaves OOB near the opponent's goal, the
+opponent receives the ball at the corner of the field and the player
+is placed between the opponent and their own goal.
+
+If a player with the ball moves into the goal area, then it is a score
+for the inverse team's goal. This means that if a player moves into
+their own goal, it counts as a score for the opponent's team.
+
+### Kicking
+
+Players with the ball have an additional `KICK` action. A kick action
+succeeds when the player is within a certain region of their
+opponent's goal (shown in the game as an area with lighter grass) and
+when there is no opponent whose midpoint is within the ragion between
+the ball and the goal (shown below).
+
+If an opponent does intercept the ball, they receive the ball at where
+they were standing and the player is placed between the opponent and
+their goal.
+
+### Some considerations when constructing the evaluation function
+
+In our experiments, we found that an evaluation function that simply
+considers the player's distance from the ball or the ball's distance
+to the opponent's goal were not enough to make a good player.
+
+The evaluation function should take into account steps into the
+future. For example, if the opponent has the ball, a player that is
+behind their opponent should have a lower evaluation than one whose is
+in-between their opponent and their goal.

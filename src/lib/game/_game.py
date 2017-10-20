@@ -76,12 +76,12 @@ class Game:
                 new_state = state.act(action)
                 if not new_state:
                     print("Invalid action performed!")
+            self._draw_state(new_state)
             if new_state in states:
                 print("State has been repeated! Therefore, game is over.")
                 break
             states += [new_state]
             state = new_state
-            self._draw_state(state)
             end_t = int(round(time.time() * 1000))
             wait_time = turn_wait - (end_t - start_t)
             # while True:
@@ -166,7 +166,7 @@ class GameState(PRecord):
 
     def reward(self, player_id):
         """Returns the reward that the player receives at the end of the
-        game. 
+        game.
 
         :param int player_id: The player id.
         :return: The reward for `player_id` if the state is terminal;
@@ -201,13 +201,16 @@ class GameState(PRecord):
 
     def _action_is_valid(self, action):
         if self.is_terminal:
-            return ValueError("""Player tried to perform an action in a terminal state. Make sure that you are performing actions solely in non-terminal states.""")
+            print("""ERROR: Player tried to perform an action in a terminal state. Make sure that you are performing actions solely in non-terminal states.""")
+            return None
 
         if not action in self.actions:
-            raise ValueError("""Player tried to perform an illegal action. Make sure that you only perform actions available in `state.actions`.
+            print("""ERROR: Player tried to perform an illegal action. Make sure that you only perform actions available in `state.actions`.
 
 Action: {}
 Allowed actions: {}""".format(action, self.actions))
+            return None
+        return self
 
     def draw(self):
         """Used internally for visualizing the state of the game in the Game
