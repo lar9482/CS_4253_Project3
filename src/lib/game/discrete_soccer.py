@@ -139,9 +139,9 @@ class SoccerState(GameState):
             Action.move(0, 1), Action.move(0, -1)
         ]
 
-        if x <= 1:
+        if player.x <= 1:
             dx = 1
-        elif x >= self.pitch.width:
+        elif player.x >= self.pitch.width:
             dx = -1
         else:
             dx = 1 if player.team == Team.RED else -1
@@ -402,7 +402,6 @@ class SoccerState(GameState):
         goal_x = self.pitch.width + 2 if team == Team.RED else 0
         goal_y1 = int(self.pitch.height - self.pitch.goal_height) / 2
         goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2
-        print(goal_y1, goal_y2)
         dx = goal_x - x
         dy1 = (goal_y1 - y)
         dy2 = (goal_y2 - y)

@@ -124,9 +124,17 @@ opponent's goal (shown in the game as an area with lighter grass) and
 when there is no opponent whose midpoint is within the ragion between
 the ball and the goal (shown below).
 
+![Intersection Example](/doc/images/discrete_soccer_intersection.png)
+
+In the above example, the opponent would intersect the ball because
+their midpoint is in the "intersection region."
+
 If an opponent does intercept the ball, they receive the ball at where
 they were standing and the player is placed between the opponent and
 their goal.
+
+You can check whether or not it is possible to shoot from a position
+using `state.can_shoot_from` or `state.check_kick`.
 
 ### Some considerations when constructing the evaluation function
 
