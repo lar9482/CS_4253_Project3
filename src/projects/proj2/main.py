@@ -10,45 +10,65 @@
 ## separate file and run it there.
 ################################################################
 
-from ...lib.game import Game, RandomAgent
+from ...lib import cli
+from ...lib.game import Game, RandomAgent, discrete_soccer, connect_four
 import sys
 from . import agent, evaluation
 
+game_module = {
+    'discrete_soccer': discrete_soccer,
+    'connect_four': connect_four
+}
+evaluations = {
+    'discrete_soccer': evaluation.soccer,
+    'connect_four': evaluation.connect_four
+}
 
 def run_game(args):
-    game_type = None
     agents = []
 
-    if args.game == 'discrete_soccer':
-        from ...lib.game import discrete_soccer
-        game_type = discrete_soccer.DiscreteSoccer()
-        my_agent = agent.MinimaxAgent(
-            evaluation.soccer,
-            alpha_beta_pruning=args.ab_pruning,
-            max_depth=args.max_depth
-        )
-        if args.interactive:
-            iagent = discrete_soccer.InteractiveAgent()
-            agents = [iagent, my_agent]
-        else:
-            agents = [my_agent, my_agent]
-    elif args.game == 'connect_four':
-        from ...lib.game import connect_four
-        game_type = connect_four.Connect4()
-        my_agent = agent.MinimaxAgent(
-            evaluation.connect_four,
-            alpha_beta_pruning=args.ab_pruning,
-            max_depth=args.max_depth
-        )
-        if args.interactive:
-            iagent = connect_four.InteractiveAgent()
-            agents = [iagent, my_agent]
-        else:
-            agents = [my_agent, my_agent]
-    else:
-        sys.exit("An invalid game type was provided.")
+    if not args.game in game_module:
+        sys.exit("Invalid game choice! Please choose from among: {}".format(game_module.keys()))
 
-    game = Game(game_type, agents)
+    gm = game_module[args.game]
+    evaluation_fn = evaluations[args.game]
+
+    minimax_agent = agent.MinimaxAgent(
+        evaluation_fn,
+        args.ab_pruning,
+        args.max_depth
+    )
+    if args.interactive:
+        interactive_agent = gm.InteractiveAgent()
+        if cli.ask_yn("Will you play as the first player?"):
+            agents = [interactive_agent, minimax_agent]
+            if args.game == 'discrete_soccer':
+                print("You will be playing on the RED team!")
+            elif args.game == 'connect_four':
+                print("You will be placing RED chips!")
+        else:
+            agents = [minimax_agent, interactive_agent]
+            if args.game == 'discrete_soccer':
+                print("You will be playing on the BLUE team!")
+            elif args.game == 'connect_four':
+                print("You will be placing BLACK chips!")
+        print()
+        if args.game == 'discrete_soccer':
+            print("""Controls:
+move: q w e
+      a   d
+      z x c
+
+kick: space
+""")
+        elif args.game == 'connect_four':
+            print("""Controls:
+place chip: 1,2,3,4,5,6,7
+""")
+    else:
+        agents = [minimax_agent, minimax_agent]
+
+    game = Game(gm.generator(), agents)
     game.run(play_again='query', speed=0)
 
 

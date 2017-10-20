@@ -13,6 +13,13 @@ system)
 in the root of the folder. If you are on another system, it should be
 some variant of `pip install -r requirements.txt`.
 
+You will need Tkinter for Python 3 to use the pygame packages. On
+Ubuntu, this can be installed by running
+
+    sudo apt-get install python3-tkinter
+
+in the command line.
+
 ## Running Evaluations
 
 The tool `evaluate.py` at the root of this direction can be run using

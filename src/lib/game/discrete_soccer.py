@@ -61,7 +61,7 @@ class InteractiveAgent(Agent):
                     return Action.KICK
 
 
-class DiscreteSoccer(GameType):
+class generator(GameType):
     def __init__(self, field_width=19, field_height=13, goal_height=5, random_pos=True):
         self.field_width = field_width
         self.field_height = field_height

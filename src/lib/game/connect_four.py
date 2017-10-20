@@ -32,7 +32,8 @@ class InteractiveAgent(Agent):
                 if action in actions:
                     return action
 
-class Connect4(GameType):
+
+class generator(GameType):
     def __init__(self, width=7, height=6, connect_length=4):
         self.width = width
         self.height = height
@@ -51,6 +52,7 @@ class Connect4(GameType):
             winner=None
         )
         return state
+
 
 class Connect4State(GameState):
     current_player_id = field(int)

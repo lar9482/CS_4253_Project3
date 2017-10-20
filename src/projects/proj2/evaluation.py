@@ -17,9 +17,9 @@ def soccer(state, player_id):
     # useful SoccerState properties.
     if not isinstance(state, discrete_soccer.SoccerState):
         raise ValueError("Evaluation function incompatible with game type.")
-    pass
+    return 0
 
 def connect_four(state, player_id):
     if not isinstance(state, connect_four.Connect4State):
         raise ValueError("Evaluation function incompatible with game type.")
-    pass
+    return 0
