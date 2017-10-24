@@ -419,7 +419,7 @@ class SoccerState(GameState):
 
     def check_kick(self, player):
         (x, y) = (player.x + 0.5, player.y - 0.5)
-        goal_x = self.pitch.width + 1.5 if player.team == Team.RED else 0.5
+        goal_x = self.pitch.width + 2 if player.team == Team.RED else 0
         goal_y1 = int(self.pitch.height - self.pitch.goal_height) / 2
         goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2
         dx = goal_x - x
@@ -433,7 +433,7 @@ class SoccerState(GameState):
         f_y2 = lambda obj_x: y + dy2 * obj_x
 
         dist = math.sqrt(dx**2 + dy**2)
-        angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))+0.1
+        angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))
 
         # Check for interceptions
         intercept = (None, float("inf"))
