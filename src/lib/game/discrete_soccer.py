@@ -27,6 +27,10 @@ class Team(IntEnum):
     def inverse(self):
         return Team.RED if self == Team.BLUE else Team.BLUE
 
+    @property
+    def name(self):
+        return "red" if self == Team.RED else "blue"
+
 
 class InteractiveAgent(Agent):
     def __init__(self, evaluation_function=None):
@@ -274,7 +278,7 @@ class SoccerState(GameState):
 
     @property
     def player_with_ball(self):
-        return next([p for p in self.players if p.has_ball], None)
+        return next((p for p in self.players if p.has_ball), [None])
 
     def goal_pos(self, team):
         """Returns the position of the `teams`'s goal."""
@@ -377,17 +381,16 @@ class SoccerState(GameState):
         if not p2:
             return state
 
-        goal_pos = self.goal_pos(team)
-        if p2.team == Team.RED:
-            p1 = self.teams['blue'][0]
-        else:
-            p1 = self.teams['red'][0]
+        goal_pos = self.goal_pos(p2.team.inverse)
+        p1 = self.players[self.teams[p2.team.inverse.name][0]]
+        goal_pos_x = goal_pos[0]
+        dx = -1 if goal_pos_x > 1 else 1
 
         state = state.transform(
-            ('players', p1.index, 'x'), goal_pos[0]+1,
+            ('players', p1.index, 'x'), goal_pos_x + dx,
             ('players', p1.index, 'y'), 1,
-            ('players', p1.index, 'has_ball'), True
-            ('players', p2.index, 'x'), goal_pos[0]+3,
+            ('players', p1.index, 'has_ball'), True,
+            ('players', p2.index, 'x'), goal_pos_x + 3*dx,
             ('players', p2.index, 'y'), 3,
             ('players', p2.index, 'has_ball'), False
         )
