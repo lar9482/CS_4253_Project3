@@ -33,12 +33,22 @@ run
 
 You will be extending the abstract [`Agent`](/src/lib/game/_game.py#L10)
 class specified in the game code. You will need to extend the `decide`
-method so that it returns the correct action given a GameState.
+method so that it returns the correct `Action`, given the current state
+of the game.
 
-Because we want our `MinimaxAgent` to be used for many kinds of games,
+The `decide` method receives a single argument -- the `state` variable, 
+which represents all information about the current state of the game 
+at a given time. Note that *the same agent is used for both players in
+our games*. For example, the `Agent` can be making decisions for the 
+players of both the Red and Blue team in discrete soccer. Each `state`
+stores a value of the current player, `state.current_player`. You may 
+assume that you must make a decision for this player within the 
+`decide` method.
+
+Since we want our `MinimaxAgent` to be used for many kinds of games,
 you can only use the most general information about a game. Each game
 extends the [`GameState`](/src/lib/game/_game.py#L135) class; in
-particular, we are given the following information:
+particular, we can assume we have the following information:
 
 1. `state.num_players` The number of players in the game
 2. `state.current_player` The numeric ID of the player whose turn it
@@ -84,7 +94,7 @@ attention to:
    player on the field (indexed by the numeric player ID)
 
 There are many helper functions provided in the `SoccerState` class,
-so it is worth reading their documentation.
+so it is worth reading its documentation.
 
 ## Game Description
 
