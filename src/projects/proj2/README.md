@@ -1,7 +1,12 @@
 # Project 2: Minimax, Alpha-Beta Game Tree Search and Reinforcement Learning
 
-In this project, you will complete an agent and an evaluation function
-to play a discretized version of soccer.
+In this project, you will complete an agent and an evaluation function to play a discretized version of soccer. You will need to add the minimax functionality to a dummy agent in [agent.py](agent.py) and an evaluation function for discrete soccer (and optionally connect four) in [evaluation.py](evaluation.py).
+
+## Submission Guidelines
+
+Submit a zip file formatted `<first-name>-<last-name>-proj2.zip` containing the [agent.py](agent.py) and [evaluation.py](evaluation.py) files and any additional code files you used for your report.
+
+Submit the report separately on Harvey.
 
 ## Usage
 
