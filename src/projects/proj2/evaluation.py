@@ -20,6 +20,12 @@ def soccer(state, player_id):
     return 0
 
 def connect_four(state, player_id):
+    # TODO: Implement this function! (optional)
+    #
+    # Since your Minimax agent can work for any game, once you implement
+    # this evaluation function, it should be able to play Connect Four.
+    # Optionally implement this evaluation function if you would like to 
+    # test your agent in another game.
     if not isinstance(state, connect_four.Connect4State):
         raise ValueError("Evaluation function incompatible with game type.")
     return 0
