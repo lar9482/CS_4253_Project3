@@ -24,6 +24,12 @@ class MinimaxAgent(RandomAgent):
         self.evaluate = evaluate_function
         self.alpha_beta_pruning = alpha_beta_pruning
         self.max_depth = max_depth
+        # This is equivalent to the constructor in Java. If you want
+        # to add any variables that track statistics (such as time to
+        # make a decision, etc) add them here. Note that if the game is
+        # between two players using Minimax, they will share whatever variables
+        # are initialized here; so, you should make sure to differentiate them
+        # using a dict() or something similar.
 
     def decide(self, state):
         # TODO: Implement this agent!
@@ -43,6 +49,10 @@ class MinimaxAgent(RandomAgent):
         # If you would like to see some example agents, check out
         # `/src/lib/game/_agents.py`.
 
+        # This is the method called to make a decision. Currently, it
+        # just sends that work to minimax or minimax_with_ab_pruning,
+        # but you can add other things (such as statistics tracking) if
+        # needed.
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player)
         else:
@@ -58,3 +68,16 @@ class MinimaxAgent(RandomAgent):
     def minimax_with_ab_pruning(self, state, player, depth=1,
                                 alpha=float('inf'), beta=-float('inf')):
         return super().decide(state)
+    
+    def learn(self, states, player_id):
+        # This is called at the conclusion of a game. `states` is a 
+        # list of all states of the game (so each decision made, effectively) and
+        # `player_id` is the player that the method is being called for.
+        #
+        # That is, for each player_id in the game, the agent.learn() method is called.
+        # If you are tracking any statistics, you should make note of this to
+        # prevent double counting.
+        #
+        # This method will be more useful when you start looking into reinforcement
+        # learning.
+        pass
