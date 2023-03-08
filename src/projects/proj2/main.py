@@ -33,21 +33,31 @@ def run_game(args):
     gm = game_module[args.game]
     evaluation_fn = evaluations[args.game]
 
-    minimax_agent = agent.MinimaxAgent(
-        evaluation_fn,
-        args.ab_pruning,
-        args.max_depth
-    )
+    computer_agent = None
+    if args.search_method == "minimax":
+        computer_agent = agent.MinimaxAgent(
+            evaluation_fn,
+            args.ab_pruning,
+            args.max_depth
+        )
+    elif args.search_method == "monte_carlo":
+        computer_agent = agent.MonteCarloAgent(
+            evaluation_fn,
+            args.max_playouts
+        )
+    if computer_agent is None:
+        print("Invalid search method")
+        exit(0)
     if args.interactive:
         interactive_agent = gm.InteractiveAgent()
         if cli.ask_yn("Will you play as the first player?"):
-            agents = [interactive_agent, minimax_agent]
+            agents = [interactive_agent, computer_agent]
             if args.game == 'discrete_soccer':
                 print("You will be playing on the RED team!")
             elif args.game == 'connect_four':
                 print("You will be placing RED chips!")
         else:
-            agents = [minimax_agent, interactive_agent]
+            agents = [computer_agent, interactive_agent]
             if args.game == 'discrete_soccer':
                 print("You will be playing on the BLUE team!")
             elif args.game == 'connect_four':
@@ -66,18 +76,21 @@ kick: space
 place chip: 1,2,3,4,5,6,7
 """)
     else:
-        agents = [minimax_agent, minimax_agent]
+        agents = [computer_agent, computer_agent]
 
-    game = Game(gm.generator(), agents)
+    game = Game(gm.generator(), agents, display=True)
     game.run(play_again='query', speed=2 if args.interactive else 0)
 
 
 def main(cl_args):
     import argparse
 
-    parser = argparse.ArgumentParser(description='Main function for Project 2: Minimax, Alpha-Beta Game Tree Search and Reinforcement Learning.')
+    parser = argparse.ArgumentParser(description='Main function for Project 2: Minimax, Alpha-Beta, Monte Carlo Game Tree Search and Reinforcement Learning.')
+    parser.add_argument('--search_method', type=str, default='minimax', \
+                        help='Game tree search method to use. (default: minimax)\n Options: minimax, monte_carlo')
     parser.add_argument('--max_depth', type=int, default=5, help='The maximum depth that minimax should search.')
     parser.add_argument('--ab_pruning', action='store_true', help='If included, use alpha-beta pruning.')
+    parser.add_argument('--max_playouts', type=int, default=100, help='The maximum number of playouts that Monte Carlo should perform.')
     parser.add_argument('--game', type=str, default='discrete_soccer', \
                         help='Game to play. (default: discrete_soccer)\n Options: discrete_soccer, connect_four')
     parser.add_argument('--interactive', action='store_true', default=False, \

@@ -7,7 +7,6 @@ from enum import Enum, IntEnum
 import math
 import random
 
-
 MAX_KICK_DIST = 5
 
 
@@ -114,7 +113,8 @@ class SoccerState(GameState):
     ## PUBLIC METHODS
     ################################################################
 
-    # You may use these methods when implementing the MinimaxAgent.
+    # You may use these methods when implementing the MinimaxAgent
+    # and MonteCarloAgent.
 
     # For information on these methods, see _game.GameState
 
@@ -167,7 +167,6 @@ class SoccerState(GameState):
         state = state._action_is_valid(action)
         if not state:
             return None
-
         if action == Action.KICK:
             state = self._update_kick()
         elif action == Action.CHANGE_STANCE:
@@ -191,8 +190,8 @@ class SoccerState(GameState):
 
     # These are 'internal' methods and variables to the SoccerState
     # class. You should not use any of these methods in the
-    # MinimaxAgent implementation, but can use them in your soccer
-    # evaluation function.
+    # MinimaxAgent and MonteCarloAgent implementations, but can use
+    # them in your soccer evaluation function.
 
     ## Variables
     # Each of these fields can be directly accessed by calling
@@ -423,25 +422,36 @@ class SoccerState(GameState):
         goal_y1 = int(self.pitch.height - self.pitch.goal_height) / 2
         goal_y2 = int(self.pitch.height + self.pitch.goal_height) / 2
         dx = goal_x - x
-        dy1 = (goal_y1 - y)
-        dy2 = (goal_y2 - y)
+        dy1 = goal_y1 - y
+        dy2 = goal_y2 - y
         norm1 = math.sqrt(dx**2 + dy1**2)
         norm2 = math.sqrt(dx**2 + dy2**2)
-        dy = ((goal_y1+goal_y2)/2 - y)
-
-        f_y1 = lambda obj_x: y + dy1 * obj_x
-        f_y2 = lambda obj_x: y + dy2 * obj_x
+        dy = (goal_y1+goal_y2)/2 - y
 
         dist = math.sqrt(dx**2 + dy**2)
         angle = math.acos((dx**2 + dy1*dy2)/(norm1*norm2))
+
+        (x, y) = (player.x + 0.5, player.y + 0.5)
+        goal_x = self.pitch.width + 1 if player.team == Team.RED else 1
+        goal_y1 = int(self.pitch.height - self.pitch.goal_height)/2 + 1
+        goal_y2 = int(self.pitch.height + self.pitch.goal_height)/2 + 1
+        dx = goal_x - x
+        dy1 = goal_y1 - y
+        dy2 = goal_y2 - y
+
+        f_y1 = lambda obj_x: dy1/dx*(obj_x - x) + y
+        f_y2 = lambda obj_x: dy2/dx*(obj_x - x) + y
 
         # Check for interceptions
         intercept = (None, float("inf"))
         for obj in self.players:
             if obj.index == player.index: continue
             (obj_x, obj_y) = (obj.x + 0.5, obj.y + 0.5)
-            obj_x = (obj_x - x) / dx
-            if obj_y >= f_y1(obj_x) and obj_y <= f_y2(obj_x):
+            if obj_y >= f_y1(obj_x) and obj_y <= f_y2(obj_x) or \
+            obj_y+0.25 >= f_y1(obj_x+0.25) and obj_y+0.25 <= f_y2(obj_x+0.25) or \
+            obj_y-0.25 >= f_y1(obj_x+0.25) and obj_y-0.25 <= f_y2(obj_x+0.25) or \
+            obj_y+0.25 >= f_y1(obj_x-0.25) and obj_y+0.25 <= f_y2(obj_x-0.25) or \
+            obj_y-0.25 >= f_y1(obj_x-0.25) and obj_y-0.25 <= f_y2(obj_x-0.25):
                 new_i = (obj, math.sqrt((x - obj_x)**2 + (y - obj_y)**2))
                 intercept = min([intercept, new_i], key=lambda x: x[1])
 

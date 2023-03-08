@@ -24,12 +24,6 @@ class MinimaxAgent(RandomAgent):
         self.evaluate = evaluate_function
         self.alpha_beta_pruning = alpha_beta_pruning
         self.max_depth = max_depth
-        # This is equivalent to the constructor in Java. If you want
-        # to add any variables that track statistics (such as time to
-        # make a decision, etc) add them here. Note that if the game is
-        # between two players using Minimax, they will share whatever variables
-        # are initialized here; so, you should make sure to differentiate them
-        # using a dict() or something similar.
 
     def decide(self, state):
         # TODO: Implement this agent!
@@ -49,10 +43,6 @@ class MinimaxAgent(RandomAgent):
         # If you would like to see some example agents, check out
         # `/src/lib/game/_agents.py`.
 
-        # This is the method called to make a decision. Currently, it
-        # just sends that work to minimax or minimax_with_ab_pruning,
-        # but you can add other things (such as statistics tracking) if
-        # needed.
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player)
         else:
@@ -68,16 +58,49 @@ class MinimaxAgent(RandomAgent):
     def minimax_with_ab_pruning(self, state, player, depth=1,
                                 alpha=float('inf'), beta=-float('inf')):
         return super().decide(state)
-    
-    def learn(self, states, player_id):
-        # This is called at the conclusion of a game. `states` is a 
-        # list of all states of the game (so each decision made, effectively) and
-        # `player_id` is the player that the method is being called for.
+
+class MonteCarloAgent(RandomAgent):
+    """An agent that makes decisions using Monte Carlo Tree Search (MCTS),
+    using an evaluation function to approximately guess how good certain
+    states are when looking far into the future.
+
+    :param evaluation_function: The function used to make evaluate a
+        GameState. Should have the parameters (state, player_id) where
+        `state` is the GameState and `player_id` is the ID of the
+        player to calculate the expected payoff for.
+
+    :param max_playouts: The maximum number of playouts to perform
+        using MCTS.
+    """
+    def __init__(self, evaluate_function, max_playouts=100):
+        super().__init__()
+        self.evaluate = evaluate_function
+        self.max_playouts = max_playouts
+
+    def decide(self, state):
+        # TODO: Implement this agent!
         #
-        # That is, for each player_id in the game, the agent.learn() method is called.
-        # If you are tracking any statistics, you should make note of this to
-        # prevent double counting.
+        # Read the documentation in /src/lib/game/_game.py for
+        # information on what the decide function does.
         #
-        # This method will be more useful when you start looking into reinforcement
-        # learning.
-        pass
+        # Do NOT call the soccer evaluation function that you write
+        # directly from this function! Instead, use
+        # `self.evaluate`. It will behave identically, but will be
+        # able to work for multiple games.
+        #
+        # Do NOT call any SoccerState-specific functions! Assume that
+        # you can only see the functions provided in the GameState
+        # class.
+        #
+        # If you would like to see some example agents, check out
+        # `/src/lib/game/_agents.py`.
+
+        return self.monte_carlo(state, state.current_player)
+
+    def monte_carlo(self, state, player):
+        # This is the suggested method you use to do MCTS.  Assume
+        # `state` is the current state, `player` is the player that
+        # the agent is representing (NOT the current player in
+        # `state`!).
+        return super().decide(state)
+
