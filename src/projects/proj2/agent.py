@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from ...lib.game import Agent, RandomAgent
+from lib.game import Agent, RandomAgent
 
 class MinimaxAgent(RandomAgent):
     """An agent that makes decisions using the Minimax algorithm, using a

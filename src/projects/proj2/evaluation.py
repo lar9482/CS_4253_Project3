@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import math, random
-from ...lib.game import discrete_soccer, connect_four
+from lib.game import discrete_soccer, connect_four
 
 def soccer(state, player_id):
     # TODO: Implement this function!
