@@ -15,6 +15,7 @@ def soccer(state, player_id):
     # SoccerState-specific information. The file
     # `src/lib/game/discrete_soccer.py` provides a description of all
     # useful SoccerState properties.
+    print('test')
     if not isinstance(state, discrete_soccer.SoccerState):
         raise ValueError("Evaluation function incompatible with game type.")
     return 0
