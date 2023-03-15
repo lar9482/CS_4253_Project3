@@ -2,6 +2,7 @@
 
 from lib.game import Agent, RandomAgent
 import sys
+import random
 
 class MinimaxAgent(RandomAgent):
     """An agent that makes decisions using the Minimax algorithm, using a
@@ -44,7 +45,6 @@ class MinimaxAgent(RandomAgent):
         # If you would like to see some example agents, check out
         # `/src/lib/game/_agents.py`.
 
-        print(state)
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player, self.max_depth)
         else:
@@ -59,17 +59,23 @@ class MinimaxAgent(RandomAgent):
         print()
         utility, move = self.minimax_max_value(state, player, depth)
 
-        return super().decide(state)
+        # return super().decide(state)
+        return move
 
     def minimax_max_value(self, state, player, depth=1):
         if (state.is_terminal != None or depth == 0):
             return self.evaluate(state, player), None
 
         value = -sys.maxsize-1
-        move = None
+        move = random.choice(state.actions)
 
         for action in state.actions:
             result_state = state.act(action)
+            
+            #Skip actions that return invalid states
+            if (result_state is None):
+                continue
+
             value2, action2 = self.minimax_min_value(result_state, result_state.current_player, depth)
 
             if (value2 >  value):
@@ -82,9 +88,15 @@ class MinimaxAgent(RandomAgent):
             return self.evaluate(state, player), None
 
         value = sys.maxsize
-        move = None
+        move = random.choice(state.actions)
+        
         for action in state.actions:
             result_state = state.act(action)
+            
+            #Skip actions that return invalid states
+            if (result_state is None):
+                continue
+
             value2, action2 = self.minimax_max_value(result_state, result_state.current_player, depth-1)
 
             if (value2 < value):
