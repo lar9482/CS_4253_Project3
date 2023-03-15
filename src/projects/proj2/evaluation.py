@@ -15,13 +15,16 @@ def soccer(state, player_id):
     # SoccerState-specific information. The file
     # `src/lib/game/discrete_soccer.py` provides a description of all
     # useful SoccerState properties.
+    if (state.current_player_obj.has_ball):
+        print()
     
+    
+
     #Case where neither player has the ball.
     if (state.objects[0].has_ball == False and state.objects[1].has_ball == False):
         dis = calculate_distance(state.current_player_obj, state.objects[2])
-        return (1/dis)
-        
-
+        return 0.75*(1/dis)
+    
     if not isinstance(state, discrete_soccer.SoccerState):
         raise ValueError("Evaluation function incompatible with game type.")
     

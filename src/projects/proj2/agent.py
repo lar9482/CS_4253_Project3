@@ -57,37 +57,51 @@ class MinimaxAgent(RandomAgent):
         # `state`!)  and `depth` is the current depth of recursion.
 
         print()
-        utility, move = self.minimax_max_value(state, player, depth)
+        utility, move = self.max_value(state, player, depth)
 
         # return super().decide(state)
         return move
+    
+    def minimax_with_ab_pruning(self, state, player, depth=1,
+                                alpha=float('inf'), beta=-float('inf')):
+        return super().decide(state)
 
-    def minimax_max_value(self, state, player, depth=1):
+    def max_value(self, state, player, depth=1):
+
+        #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
             return self.evaluate(state, player), None
 
-        value = -sys.maxsize-1
+        #Placeholder variables for the best utility and move
+        value = -float('inf')
         move = random.choice(state.actions)
 
         for action in state.actions:
+
+            #Get the state that results from executing the "action" on the current state
             result_state = state.act(action)
             
             #Skip actions that return invalid states
             if (result_state is None):
                 continue
+            
+            #Get utility/best-action from the tree level below(aka min level)
+            value2, action2 = self.min_value(result_state, result_state.current_player, depth)
 
-            value2, action2 = self.minimax_min_value(result_state, result_state.current_player, depth)
-
+            #Keep track of utility/action pair that has a higher utility.
             if (value2 >  value):
                 value, move = value2, action
         
         return value, move
 
-    def minimax_min_value(self, state, player, depth=1):
+    def min_value(self, state, player, depth=1):
+
+        #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
             return self.evaluate(state, player), None
 
-        value = sys.maxsize
+        #Placeholder variables for the best utility and move
+        value = float('inf')
         move = random.choice(state.actions)
         
         for action in state.actions:
@@ -96,17 +110,15 @@ class MinimaxAgent(RandomAgent):
             #Skip actions that return invalid states
             if (result_state is None):
                 continue
+            
+            #Get utility/best-action from the tree level below(aka max level)
+            value2, action2 = self.max_value(result_state, result_state.current_player, depth-1)
 
-            value2, action2 = self.minimax_max_value(result_state, result_state.current_player, depth-1)
-
+            #Keep track of utility/action pair that has a lower utility.
             if (value2 < value):
                 value, move = value2, action
 
         return value, move
-
-    def minimax_with_ab_pruning(self, state, player, depth=1,
-                                alpha=float('inf'), beta=-float('inf')):
-        return super().decide(state)
 
 class MonteCarloAgent(RandomAgent):
     """An agent that makes decisions using Monte Carlo Tree Search (MCTS),
