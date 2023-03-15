@@ -48,7 +48,7 @@ class MinimaxAgent(RandomAgent):
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player, self.max_depth)
         else:
-            return self.minimax_with_ab_pruning(state, state.current_player, self.max_depth)
+            return self.minimax_with_ab_pruning(state, state.current_player, self.max_depth, -float('inf'), float('inf'))
 
     def minimax(self, state, player, depth=1):
         # This is the suggested method you use to do minimax.  Assume
@@ -63,10 +63,13 @@ class MinimaxAgent(RandomAgent):
         return move
     
     def minimax_with_ab_pruning(self, state, player, depth=1,
-                                alpha=float('inf'), beta=-float('inf')):
-        return super().decide(state)
+                                alpha=-float('inf'), beta=float('inf')):
+        # return super().decide(state)
+        utility, move = self.max_value(state, player, depth, alpha, beta)
 
-    def max_value(self, state, player, depth=1):
+        return move
+
+    def max_value(self, state, player, depth=1, alpha=None, beta=None):
 
         #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
@@ -77,7 +80,6 @@ class MinimaxAgent(RandomAgent):
         move = random.choice(state.actions)
 
         for action in state.actions:
-
             #Get the state that results from executing the "action" on the current state
             result_state = state.act(action)
             
@@ -86,15 +88,26 @@ class MinimaxAgent(RandomAgent):
                 continue
             
             #Get utility/best-action from the tree level below(aka min level)
-            value2, action2 = self.min_value(result_state, result_state.current_player, depth)
+            value2, action2 = self.min_value(result_state, result_state.current_player, depth, alpha, beta)
 
             #Keep track of utility/action pair that has a higher utility.
-            if (value2 >  value):
+            if (value2 > value):
                 value, move = value2, action
-        
+
+                #If alpha-beta pruning is enabled, keep track of the highest utility so far 
+                # through alpha 
+                if (alpha != None):
+                    alpha = max(alpha, value)
+            
+            #If alpha-beta pruning is enabhled, immediately return utility/action pair whose utility
+            #happens less than beta. This indicates that the best utility has been found
+            if (beta != None and beta >= value):
+                return value, move
+
+        #Return the best utility/action pair of this level.
         return value, move
 
-    def min_value(self, state, player, depth=1):
+    def min_value(self, state, player, depth=1, alpha=None, beta=None):
 
         #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
@@ -112,12 +125,19 @@ class MinimaxAgent(RandomAgent):
                 continue
             
             #Get utility/best-action from the tree level below(aka max level)
-            value2, action2 = self.max_value(result_state, result_state.current_player, depth-1)
+            value2, action2 = self.max_value(result_state, result_state.current_player, depth-1, alpha, beta)
 
             #Keep track of utility/action pair that has a lower utility.
             if (value2 < value):
                 value, move = value2, action
 
+                if (beta != None):
+                    beta = min(beta, value)
+                
+            if (alpha != None and value <= alpha):
+                return value, move
+
+        #Return the best utility/action pair of this level.
         return value, move
 
 class MonteCarloAgent(RandomAgent):
