@@ -61,8 +61,20 @@ def soccer(state, player_id):
             other_pos[1]
         )
 
-        #Take the sum of distance between goal minus the other player
-        return (dis_curr_goal) - (dis_curr_other)
+        dis_other_goal = calculate_distance(
+            other_pos[0],
+            curr_goal[0],
+            other_pos[1],
+            curr_goal[1]
+        )
+
+        #If the other player is farther away from the current player's goal
+        if (dis_other_goal > dis_curr_goal):
+            #Return the minimum distance between current player and goal
+            return dis_curr_goal
+        else:
+            #Else, take the other player into account
+            return (dis_curr_goal) - (dis_curr_other)
 
     #Case where neither player has the ball.
     elif (state.objects[0].has_ball == False and state.objects[1].has_ball == False):
