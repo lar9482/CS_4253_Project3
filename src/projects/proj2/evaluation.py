@@ -6,7 +6,8 @@ from lib.game import discrete_soccer, connect_four
 
 #The main evaluation function that is used in the soccer game
 def soccer(state, player_id):
-    
+
+
     #Case where a win/loss is detected in the game
     if (state.is_terminal != None):
         #If the winning team did not belong to the "current" player
@@ -79,8 +80,37 @@ def soccer(state, player_id):
         #Try to minimize the distance between current player and the ball
         return  0.5*(1/dis)
     
+    #Case where the other player has the ball.
+    elif (state.objects[get_other_player_id(player_id)].has_ball):
+
+        #Get position of current player
+        curr_pos = curr_player_pos(state, player_id)
+
+        #Calculating the id of the other player.
+        other_id = get_other_player_id(player_id)
+
+        #Get position of other player
+        other_pos = other_player_pos(state.objects[player_id], state)
+
+        #Get position of the other player's goal.
+        other_goal_pos = curr_player_goal(state.objects[other_id], state)
+        
+        #Calculating the midpoint position between the other player and its goal.
+        midpoint_x = (other_pos[0] + other_goal_pos[0]) / 2
+        midpoint_y = (other_pos[1] + other_goal_pos[1]) / 2
+
+        #Calculate the distance between the current player
+        #and the midpoint.
+        dis_curr_midpoint = calculate_distance(
+                                curr_pos[0],
+                                midpoint_x,
+                                curr_pos[1],
+                                midpoint_y
+                            )
+        return -(dis_curr_midpoint)
+    
     else:
-        return 10
+        return 0
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")
 

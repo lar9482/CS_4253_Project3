@@ -93,7 +93,7 @@ def main(cl_args):
     parser.add_argument('--max_playouts', type=int, default=100, help='The maximum number of playouts that Monte Carlo should perform.')
     parser.add_argument('--game', type=str, default='discrete_soccer', \
                         help='Game to play. (default: discrete_soccer)\n Options: discrete_soccer, connect_four')
-    parser.add_argument('--interactive', action='store_true', default=False, \
+    parser.add_argument('--interactive', action='store_true', default=True, \
                         help='If included, a human player will be able to join the game.')
 
     args = parser.parse_args(cl_args)
