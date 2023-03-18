@@ -67,7 +67,6 @@ class MinimaxAgent(RandomAgent):
         # return super().decide(state)
         print('Executing ab pruning')
         utility, move = self.max_value(state, player, depth, alpha, beta)
-
         return move
 
     def max_value(self, state, player, depth=1, alpha=None, beta=None):

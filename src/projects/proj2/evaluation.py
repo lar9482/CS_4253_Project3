@@ -56,13 +56,15 @@ def soccer(state, player_id):
             other_pos[1],
             curr_goal[1]
         )
-        #If the other player is not inbetween
+
+        #If the other player is not inbetween the current player and its goal.
+        #Basically, the current player is free to go to its goal.
         if (dis_other_goal > dis_curr_other):
             #Return the minimum distance between current player and goal
-            return (15/dis_curr_goal)
+            return (30/dis_curr_goal)
         else:
             #Else, take the other player into account
-            return (15/dis_curr_goal) - dis_curr_goal
+            return 0.8*((30/dis_curr_goal) - (dis_curr_goal / 5))
 
 
     #Case where neither player has the ball.
@@ -75,10 +77,10 @@ def soccer(state, player_id):
                                  player_pos[1],
                                  state.objects[2].y)
         #Try to minimize the distance between current player and the ball
-        return  (1/dis)
+        return  0.5*(1/dis)
     
     else:
-        return 0
+        return 10
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")
 
@@ -113,6 +115,11 @@ def other_player_pos(player, state):
 def curr_player_pos(state, player_id):
     return (state.objects[player_id].x, state.objects[player_id].y)
 
+def get_other_player_id(player_id):
+    if (player_id == 0):
+        return 1
+    else:
+        return 0
 
 
 ################################################################################################
