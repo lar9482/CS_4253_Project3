@@ -6,23 +6,17 @@ from lib.game import discrete_soccer, connect_four
 
 #The main evaluation function that is used in the soccer game
 def soccer(state, player_id):
-
-
     #Case where a win/loss is detected in the game
     if (state.is_terminal != None):
         #If the winning team did not belong to the "current" player
         #Indicating the player who just played won the game
         if (state.is_terminal != state.objects[player_id].team):
-            return (1000)
+            return 1000
         
         #If the winning team does belong to the current player.
         #Indicating that the player who just played lost the game
         elif (state.is_terminal == state.objects[player_id].team):
-            return -1000
-        
-        #Else, return no utility preference
-        else:
-            return 0
+             return -1000
 
     #Case where the current player has the ball
     elif (state.objects[player_id] == state.player_with_ball):
@@ -78,7 +72,7 @@ def soccer(state, player_id):
                                  player_pos[1],
                                  state.objects[2].y)
         #Try to minimize the distance between current player and the ball
-        return  0.5*(1/dis)
+        return 0.5*(1/dis)
     
     #Case where the other player has the ball.
     elif (state.objects[get_other_player_id(player_id)].has_ball):
@@ -108,9 +102,7 @@ def soccer(state, player_id):
                                 midpoint_y
                             )
         return -(dis_curr_midpoint)
-    
-    else:
-        return 0
+
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")
 

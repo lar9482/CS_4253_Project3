@@ -48,7 +48,7 @@ class MinimaxAgent(RandomAgent):
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player, self.max_depth)
         else:
-            return self.minimax_with_ab_pruning(state, state.current_player, self.max_depth, -float('inf'), float('inf'))
+            return self.minimax_with_ab_pruning(state, state.current_player, self.max_depth, float('inf'), -float('inf'))
 
     def minimax(self, state, player, depth=1):
         # This is the suggested method you use to do minimax.  Assume
@@ -63,7 +63,7 @@ class MinimaxAgent(RandomAgent):
         return move
     
     def minimax_with_ab_pruning(self, state, player, depth=1,
-                                alpha=-float('inf'), beta=float('inf')):
+                                alpha=float('inf'), beta=-float('inf')):
         # return super().decide(state)
         print('Executing ab pruning')
         utility, move = self.max_value(state, player, depth, alpha, beta)
