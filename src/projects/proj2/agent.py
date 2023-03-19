@@ -157,7 +157,7 @@ class MonteCarloAgent(RandomAgent):
         super().__init__()
         self.evaluate = evaluate_function
         self.max_playouts = max_playouts
-
+        
     def decide(self, state):
         # TODO: Implement this agent!
         #
