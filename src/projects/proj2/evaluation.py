@@ -11,12 +11,12 @@ def soccer(state, player_id):
         #If the winning team did not belong to the "current" player
         #Indicating the player who just played won the game
         if (state.is_terminal != state.objects[player_id].team):
-            return 1000
+            return 5
         
         #If the winning team does belong to the current player.
         #Indicating that the player who just played lost the game
         elif (state.is_terminal == state.objects[player_id].team):
-             return -1000
+             return -5
 
     #Case where the current player has the ball
     elif (state.objects[player_id] == state.player_with_ball):
@@ -56,10 +56,10 @@ def soccer(state, player_id):
         #Basically, the current player is free to go to its goal.
         if (dis_other_goal > dis_curr_other):
             #Return the minimum distance between current player and goal
-            return (30/dis_curr_goal)
+            return (5/dis_curr_goal)
         else:
             #Else, take the other player into account
-            return 0.8*((30/dis_curr_goal) - (dis_curr_goal / 5))
+            return 0.75*((5/dis_curr_goal) - (dis_curr_goal))
 
 
     #Case where neither player has the ball.
@@ -76,7 +76,7 @@ def soccer(state, player_id):
     
     #Case where the other player has the ball.
     elif (state.objects[get_other_player_id(player_id)].has_ball):
-
+        print('Other')
         #Get position of current player
         curr_pos = curr_player_pos(state, player_id)
 
@@ -101,7 +101,7 @@ def soccer(state, player_id):
                                 curr_pos[1],
                                 midpoint_y
                             )
-        return -(dis_curr_midpoint)
+        return 0.25*(dis_curr_midpoint)
 
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")

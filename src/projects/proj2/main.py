@@ -86,7 +86,7 @@ def main(cl_args):
     import argparse
 
     parser = argparse.ArgumentParser(description='Main function for Project 2: Minimax, Alpha-Beta, Monte Carlo Game Tree Search and Reinforcement Learning.')
-    parser.add_argument('--search_method', type=str, default='monte_carlo', \
+    parser.add_argument('--search_method', type=str, default='minimax', \
                         help='Game tree search method to use. (default: minimax)\n Options: minimax, monte_carlo')
     parser.add_argument('--max_depth', type=int, default=1, help='The maximum depth that minimax should search.')
     parser.add_argument('--ab_pruning', action='store_true', default=False, help='If included, use alpha-beta pruning.')

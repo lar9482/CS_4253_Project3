@@ -4,6 +4,8 @@ from lib.game import Agent, RandomAgent
 import sys
 import random
 
+from MCTS.node import node
+
 class MinimaxAgent(RandomAgent):
     """An agent that makes decisions using the Minimax algorithm, using a
     evaluation function to approximately guess how good certain states
@@ -157,7 +159,7 @@ class MonteCarloAgent(RandomAgent):
         super().__init__()
         self.evaluate = evaluate_function
         self.max_playouts = max_playouts
-        
+
     def decide(self, state):
         # TODO: Implement this agent!
         #
