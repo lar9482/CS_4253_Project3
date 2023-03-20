@@ -193,6 +193,9 @@ class MonteCarloAgent(RandomAgent):
             
             #Select a leaf node in the tree according to the selection policy.
             leaf_node = self.select(tree)
+            result_node = self.expand(leaf_node)
+            print()
+
         return super().decide(state)
     
     def select(self, tree):
@@ -215,8 +218,7 @@ class MonteCarloAgent(RandomAgent):
                     possible_successor = child_node
             
             leaf_node = possible_successor
-        
-        
+
         return leaf_node
     
     #Implementation of a simple UCB selection policy
@@ -227,4 +229,31 @@ class MonteCarloAgent(RandomAgent):
         )
         
         return exploit_term + explore_term
+    
+    #Expands children nodes to the inputted leaf node 
+    #based on all possible actions avaliable for the leaf node's state.
+    #The child node with the highest evaluation is returned
+    def expand(self, leaf_node):
+        curr_state = leaf_node.state
+        
+        #Keep track of the child node that has the highest evaluation.
+        possible_successor_node = None
+        max_eval = -sys.maxsize - 1
+
+        #For every action in the leaf node's state, construct a child node from the taken action.
+        #Also keep track of the children's maximum evaluation.
+        for action in curr_state.actions:
+            new_state = curr_state.act(action)
+            eval = self.evaluate(new_state, new_state.current_player)
+
+            new_node = node(new_state, new_state.current_player)
+            leaf_node.children.append(new_node)
+            new_node.parent = leaf_node
+
+            if (eval > max_eval):
+                max_eval = eval
+                possible_successor_node = new_node
+
+        #Return the child node with the highest evaluation
+        return possible_successor_node
 
