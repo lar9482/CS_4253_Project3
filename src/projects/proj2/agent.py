@@ -3,6 +3,7 @@
 from lib.game import Agent, RandomAgent
 import sys
 import random
+import math
 
 from MCTS.node import node
 
@@ -46,7 +47,7 @@ class MinimaxAgent(RandomAgent):
         #
         # If you would like to see some example agents, check out
         # `/src/lib/game/_agents.py`.
-
+        
         if not self.alpha_beta_pruning:
             return self.minimax(state, state.current_player, self.max_depth)
         else:
@@ -114,6 +115,7 @@ class MinimaxAgent(RandomAgent):
         #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
             return self.evaluate(state, player), None
+
 
         #Placeholder variables for the best utility and move
         value = float('inf')
@@ -185,5 +187,44 @@ class MonteCarloAgent(RandomAgent):
         # `state` is the current state, `player` is the player that
         # the agent is representing (NOT the current player in
         # `state`!).
+        tree = node(state, player)
+
+        for curr_playout in range(0, self.max_playouts):
+            
+            #Select a leaf node in the tree according to the selection policy.
+            leaf_node = self.select(tree)
         return super().decide(state)
+    
+    def select(self, tree):
+        leaf_node = tree
+
+        #If the current leaf_node has child nodes, then perform a selection policy search.
+        while (leaf_node.children != []):
+
+            #Keeping track of the node that maximizes the selection policy
+            max_selection_utility = -sys.maxsize - 1
+            possible_successor = leaf_node
+
+            #Given the children of the current leaf node, 
+            # identify the node that maximizes the selection policy
+            for child_node in leaf_node.children:
+                curr_selection_utility = self.selection_policy(child_node)
+
+                if (curr_selection_utility > max_selection_utility):
+                    max_selection_utility = curr_selection_utility
+                    possible_successor = child_node
+            
+            leaf_node = possible_successor
+        
+        
+        return leaf_node
+    
+    #Implementation of a simple UCB selection policy
+    def selection_policy(self, node):
+        exploit_term = (node.total_utility) / (node.total_playouts)
+        explore_term = math.sqrt(2) * math.sqrt(
+            math.log(node.parent.total_playouts) / (node.total_playouts)
+        )
+        
+        return exploit_term + explore_term
 
