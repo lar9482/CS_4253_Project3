@@ -81,7 +81,6 @@ place chip: 1,2,3,4,5,6,7
     game = Game(gm.generator(), agents, display=True)
     game.run(play_again='query', speed=2 if args.interactive else 0)
 
-
 def main(cl_args):
     import argparse
 

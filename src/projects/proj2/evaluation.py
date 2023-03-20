@@ -11,12 +11,12 @@ def soccer(state, player_id):
         #If the winning team did not belong to the "current" player
         #Indicating the player who just played won the game
         if (state.is_terminal != state.objects[player_id].team):
-            return 5
+            return 10
         
         #If the winning team does belong to the current player.
         #Indicating that the player who just played lost the game
         elif (state.is_terminal == state.objects[player_id].team):
-             return -5
+             return -10
 
     #Case where the current player has the ball
     elif (state.objects[player_id] == state.player_with_ball):
@@ -76,7 +76,6 @@ def soccer(state, player_id):
     
     #Case where the other player has the ball.
     elif (state.objects[get_other_player_id(player_id)].has_ball):
-        print('Other')
         #Get position of current player
         curr_pos = curr_player_pos(state, player_id)
 
@@ -101,7 +100,10 @@ def soccer(state, player_id):
                                 curr_pos[1],
                                 midpoint_y
                             )
-        return 0.25*(dis_curr_midpoint)
+        if (dis_curr_midpoint == 0):
+            return 0.5
+        
+        return 0.25*(1/dis_curr_midpoint)
 
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")

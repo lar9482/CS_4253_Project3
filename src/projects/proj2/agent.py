@@ -159,7 +159,11 @@ class MonteCarloAgent(RandomAgent):
     """
     def __init__(self, evaluate_function, max_playouts=100):
         super().__init__()
+
+        #Basically the playout policy
         self.evaluate = evaluate_function
+
+        #The number of playouts that need to be happen to choose a node.
         self.max_playouts = max_playouts
 
     def decide(self, state):
@@ -193,7 +197,11 @@ class MonteCarloAgent(RandomAgent):
             
             #Select a leaf node in the tree according to the selection policy.
             leaf_node = self.select(tree)
-            result_node = self.expand(leaf_node)
+
+            #Given all actions, expand leaf_node's children and get the child that has the highest evaluation
+            child_node = self.expand(leaf_node)
+
+            self.simulate(child_node)
             print()
 
         return super().decide(state)
@@ -201,7 +209,7 @@ class MonteCarloAgent(RandomAgent):
     def select(self, tree):
         leaf_node = tree
 
-        #If the current leaf_node has child nodes, then perform a selection policy search.
+        #If the current leaf_node has children, then perform a selection policy search.
         while (leaf_node.children != []):
 
             #Keeping track of the node that maximizes the selection policy
@@ -223,13 +231,16 @@ class MonteCarloAgent(RandomAgent):
     
     #Implementation of a simple UCB selection policy
     def selection_policy(self, node):
+        #Case where the current node has not had a playout at all.
+        if (node.total_playouts == 0):
+            return 0
+        
         exploit_term = (node.total_utility) / (node.total_playouts)
         explore_term = math.sqrt(2) * math.sqrt(
             math.log(node.parent.total_playouts) / (node.total_playouts)
         )
-        
         return exploit_term + explore_term
-    
+
     #Expands children nodes to the inputted leaf node 
     #based on all possible actions avaliable for the leaf node's state.
     #The child node with the highest evaluation is returned
@@ -244,6 +255,10 @@ class MonteCarloAgent(RandomAgent):
         #Also keep track of the children's maximum evaluation.
         for action in curr_state.actions:
             new_state = curr_state.act(action)
+
+            if (new_state is None):
+                continue
+            
             eval = self.evaluate(new_state, new_state.current_player)
 
             new_node = node(new_state, new_state.current_player)
@@ -256,4 +271,27 @@ class MonteCarloAgent(RandomAgent):
 
         #Return the child node with the highest evaluation
         return possible_successor_node
+    
+    def simulate(self, child):
+        curr_state = child.state
+        seen_states = [curr_state]
+        
+        while (True):
+            result_state = None
+            max_eval = -sys.maxsize - 1
+            for action in curr_state.actions:
+                new_state = curr_state.act(action)
+                if (new_state is None):
+                    continue
+                new_eval = self.evaluate(new_state, new_state.current_player)
 
+                if (new_eval > max_eval):
+                    max_eval = new_eval
+                    result_state = new_state
+
+            if (result_state.is_terminal != None or result_state in seen_states):
+                break
+            seen_states.append(result_state)
+            curr_state = result_state
+               
+        return (self.evaluate(curr_state), curr_state)
