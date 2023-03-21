@@ -301,12 +301,12 @@ class MonteCarloAgent(RandomAgent):
                     result_state = new_state
 
             #Test if the result state is terminal or has been repeated
-            if (result_state.player_with_ball != curr_state.player_with_ball or
-                result_state.ball_in_blue_goal != curr_state.ball_in_blue_goal or 
-                result_state.ball_in_red_goal != curr_state.ball_in_red_goal):
-
-                curr_state = result_state
-                break
+            if (result_state != None and curr_state != None):
+                if (result_state.player_with_ball != curr_state.player_with_ball or
+                    result_state.ball_in_blue_goal != curr_state.ball_in_blue_goal or 
+                    result_state.ball_in_red_goal != curr_state.ball_in_red_goal):
+                    curr_state = result_state
+                    break
 
             #Append result state to be tested for repeating states later
             curr_state = result_state
@@ -321,8 +321,6 @@ class MonteCarloAgent(RandomAgent):
         while (curr_node != None):
             if (curr_node.player_id == final_state.current_player):
                 curr_node.total_utility += utility
-            else:
-                curr_node.total_utility -= utility
 
             curr_node.total_playouts += 1
             curr_node = curr_node.parent
