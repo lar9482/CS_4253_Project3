@@ -11,12 +11,12 @@ def soccer(state, player_id):
         #If the winning team did not belong to the "current" player
         #Indicating the player who just played won the game
         if (state.is_terminal != state.objects[player_id].team):
-            return 5
+            return 50
         
         #If the winning team does belong to the current player.
         #Indicating that the player who just played lost the game
         elif (state.is_terminal == state.objects[player_id].team):
-             return -5
+             return 0
 
     #Case where the current player has the ball
     elif (state.objects[player_id] == state.player_with_ball):
@@ -57,10 +57,10 @@ def soccer(state, player_id):
         #Basically, the current player is free to go to its goal.
         if (dis_other_goal > dis_curr_other):
             #Return the minimum distance between current player and goal
-            return (5/dis_curr_goal)
+            return 40*(5/dis_curr_goal)
         else:
             #Else, take the other player into account
-            return 0.75*((5/dis_curr_goal) - (dis_curr_other))
+            return 30*((5/dis_curr_goal) - (dis_curr_other))
 
 
     #Case where neither player has the ball.
@@ -75,7 +75,7 @@ def soccer(state, player_id):
                                  state.objects[2].y)
         #Try to minimize the distance between current player and the ball
         print("%s -> %s" % (str(player_id), str(player_pos)))
-        return 0.5*(1/dis)
+        return 20*(1/dis)
     
     #Case where the other player has the ball.
     elif (state.objects[get_other_player_id(player_id)].has_ball):
@@ -105,9 +105,9 @@ def soccer(state, player_id):
                                 midpoint_y
                             )
         if (dis_curr_midpoint == 0):
-            return 0.5
+            return 20
         
-        return 0.25*(1/dis_curr_midpoint)
+        return 10*(1/dis_curr_midpoint)
 
     # if not isinstance(state, discrete_soccer.SoccerState):
     #     raise ValueError("Evaluation function incompatible with game type.")

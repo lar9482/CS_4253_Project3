@@ -204,6 +204,7 @@ class MonteCarloAgent(RandomAgent):
             #Simulate the soccer game from the child node.
             (utility, final_state) = self.simulate(child_node)
 
+            #From the results of the simulation, update the tree.
             self.propagate(utility, final_state, child_node)
 
         # return super().decide(state)
@@ -260,7 +261,7 @@ class MonteCarloAgent(RandomAgent):
             if (new_state is None):
                 continue
             
-            eval = self.evaluate(new_state, new_state.current_player)
+            eval = self.evaluate(new_state, curr_state.current_player)
 
             #Given the new state with its associated evaluation, make a new child node
             #for the inputted leaf node.
@@ -288,7 +289,6 @@ class MonteCarloAgent(RandomAgent):
 
             result_state = None
             max_eval = -sys.maxsize - 1
-
             #For every action, get the resultant state that returns the highest evaluation
             for action in curr_state.actions:
                 new_state = curr_state.act(action)
@@ -302,9 +302,7 @@ class MonteCarloAgent(RandomAgent):
 
             #Test if the result state is terminal or has been repeated
             if (result_state != None and curr_state != None):
-                if (result_state.player_with_ball != curr_state.player_with_ball or
-                    result_state.ball_in_blue_goal != curr_state.ball_in_blue_goal or 
-                    result_state.ball_in_red_goal != curr_state.ball_in_red_goal):
+                if (result_state.player_with_ball != curr_state.player_with_ball):
                     curr_state = result_state
                     break
 
