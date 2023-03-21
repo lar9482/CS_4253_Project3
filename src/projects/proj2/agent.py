@@ -77,7 +77,7 @@ class MinimaxAgent(RandomAgent):
         #A "leaf" node is reached if the state is terminal or the depth level has been exhausted
         if (state.is_terminal != None or depth == 0):
             return self.evaluate(state, player), None
-
+        
         #Placeholder variables for the best utility and move
         value = -float('inf')
         move = random.choice(state.actions)
@@ -206,7 +206,8 @@ class MonteCarloAgent(RandomAgent):
 
             self.propagate(utility, final_state, child_node)
 
-        return super().decide(state)
+        # return super().decide(state)
+        return self.return_max_playout_move(tree)
     
     def select(self, tree):
         leaf_node = tree
@@ -216,7 +217,7 @@ class MonteCarloAgent(RandomAgent):
 
             #Keeping track of the node that maximizes the selection policy
             max_selection_utility = -sys.maxsize - 1
-            possible_successor = leaf_node
+            possible_successors = []
 
             #Given the children of the current leaf node, 
             # identify the node that maximizes the selection policy
@@ -225,9 +226,11 @@ class MonteCarloAgent(RandomAgent):
 
                 if (curr_selection_utility > max_selection_utility):
                     max_selection_utility = curr_selection_utility
-                    possible_successor = child_node
+                    possible_successors = [child_node]
+                elif (curr_selection_utility == max_selection_utility):
+                    possible_successors.append(child_node)
             
-            leaf_node = possible_successor
+            leaf_node = random.choice(possible_successors)
 
         return leaf_node
     
@@ -276,13 +279,13 @@ class MonteCarloAgent(RandomAgent):
 
         #Keep track of the current state and previously seen states.
         curr_state = child.state
-        seen_states = [curr_state]
         
         #Loop until the state is terminal or has been repeated.
         while (True):
 
             #Track the resultant state that has the maximium evaluation
             #according to the playout policy
+
             result_state = None
             max_eval = -sys.maxsize - 1
 
@@ -291,20 +294,23 @@ class MonteCarloAgent(RandomAgent):
                 new_state = curr_state.act(action)
                 if (new_state is None):
                     continue
-                new_eval = self.evaluate(new_state, new_state.current_player)
+                new_eval = self.evaluate(new_state, curr_state.current_player)
 
                 if (new_eval > max_eval):
                     max_eval = new_eval
                     result_state = new_state
 
             #Test if the result state is terminal or has been repeated
-            if (result_state.is_terminal != None or result_state in seen_states):
+            if (result_state.player_with_ball != curr_state.player_with_ball or
+                result_state.ball_in_blue_goal != curr_state.ball_in_blue_goal or 
+                result_state.ball_in_red_goal != curr_state.ball_in_red_goal):
+
+                curr_state = result_state
                 break
-            
+
             #Append result state to be tested for repeating states later
-            seen_states.append(result_state)
             curr_state = result_state
-        
+            
         return (self.evaluate(curr_state, curr_state.current_player), curr_state)
     
     def propagate(self, utility, final_state, leaf_node):
@@ -315,7 +321,24 @@ class MonteCarloAgent(RandomAgent):
         while (curr_node != None):
             if (curr_node.player_id == final_state.current_player):
                 curr_node.total_utility += utility
+            else:
+                curr_node.total_utility -= utility
 
             curr_node.total_playouts += 1
-
             curr_node = curr_node.parent
+
+    def return_max_playout_move(self, tree):
+        possible_action = None
+        max_playouts = -sys.maxsize - 1
+
+        for action in tree.state.actions:
+            result_state = tree.state.act(action)
+            
+            for child_node in tree.children:
+                if (child_node.state == result_state):
+                    if (child_node.total_playouts > max_playouts):
+                        max_playouts = child_node.total_playouts
+                        possible_action = action
+                    break
+
+        return possible_action
