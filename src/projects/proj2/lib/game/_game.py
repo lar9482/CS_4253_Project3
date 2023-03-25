@@ -6,6 +6,7 @@ import pygame
 from pyrsistent import m, v, pmap, PRecord
 import time
 
+from timeit import default_timer as timer
 
 class Agent:
     def __init__(self):
@@ -57,6 +58,21 @@ class Game:
         states = [state]
         i = -1
         self._draw_state(state)
+
+
+        stat_dictionary = {}
+        stat_dictionary["red_team_moves"] = 0
+        stat_dictionary["blue_team_moves"] = 0
+        stat_dictionary["total_moves"] = 0
+        stat_dictionary["won"] = ""
+        stat_dictionary["time"] = 0
+
+        red_team_moves = 0
+        blue_team_moves = 0
+        repeated = False
+        start_time = timer()
+
+
         if speed == 2:
             turn_wait = 0
             round_wait = 10
@@ -78,6 +94,12 @@ class Game:
                     print("Invalid action performed!")
             self._draw_state(new_state)
             if new_state in states:
+                stat_dictionary["red_team_moves"] = str(red_team_moves)
+                stat_dictionary["blue_team_moves"] = str(blue_team_moves)
+                stat_dictionary["total_moves"] = str(red_team_moves+blue_team_moves)
+                stat_dictionary["won"] = "draw"
+                stat_dictionary["time"] = str(timer() - start_time)
+                repeated = True
                 print("State has been repeated! Therefore, game is over.")
                 break
             states += [new_state]
@@ -92,8 +114,24 @@ class Game:
             #             break
             if wait_time > 0 and self.display:
                 pygame.time.wait(wait_time)
+
+            if (state.objects[state.current_player].team == 1): 
+                red_team_moves += 1
+            
+            if (state.objects[state.current_player].team == 2):
+                blue_team_moves += 1 
+
+        if (not repeated):
+            stat_dictionary["red_team_moves"] = str(red_team_moves)
+            stat_dictionary["blue_team_moves"] = str(blue_team_moves)
+            stat_dictionary["total_moves"] = str(red_team_moves+blue_team_moves)
+            stat_dictionary["won"] = str(state.is_terminal)
+            stat_dictionary["time"] = str(timer() - start_time)
+            print()
+
         for player_id, agent in enumerate(self.agents):
             agent.learn(states, player_id)
+
         pygame.time.wait(round_wait)
 
     def _draw_state(self, state):

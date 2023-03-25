@@ -250,7 +250,7 @@ class MonteCarloAgent(RandomAgent):
         curr_state = leaf_node.state
         
         #Keep track of the child node that has the highest evaluation.
-        possible_successor_node = None
+        possible_successor_node = leaf_node
         max_eval = -sys.maxsize - 1
 
         #For every action in the leaf node's state, construct a child node from the taken action.
@@ -280,10 +280,14 @@ class MonteCarloAgent(RandomAgent):
 
         #Keep track of the current state and previously seen states.
         curr_state = child.state
-        
+        if (curr_state.is_terminal != None):
+            print()
         #Loop until the state is terminal or has been repeated.
         while (True):
-
+            
+            #Checking if the passed in state is terminal or not.
+            if (curr_state.is_terminal != None):
+                break
             #Track the resultant state that has the maximium evaluation
             #according to the playout policy
 
@@ -302,7 +306,8 @@ class MonteCarloAgent(RandomAgent):
 
             #Test if the result state is terminal or has been repeated
             if (result_state != None and curr_state != None):
-                if (result_state.player_with_ball != curr_state.player_with_ball):
+                if (result_state.player_with_ball != curr_state.player_with_ball or
+                    result_state.is_terminal != None):
                     curr_state = result_state
                     break
 
