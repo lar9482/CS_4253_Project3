@@ -48,10 +48,14 @@ class Game:
             self.screen = pygame.display.set_mode((672, 480))
 
     def run(self, play_again='query', speed=2):
-        while True:
-            self._run_round(speed)
-            if not play_again or play_again == 'query' and not self._play_again():
-                break
+        # while True:
+        #     self._run_round(speed)
+        #     if not play_again or play_again == 'query' and not self._play_again():
+        #         break
+        stat_dictionary = self._run_round(speed)
+        
+        return stat_dictionary
+
 
     def _run_round(self, speed):
         state = self.game_type.init(self.agents)
@@ -72,6 +76,7 @@ class Game:
         repeated = False
         start_time = timer()
 
+        iteration_threshold = 1000
 
         if speed == 2:
             turn_wait = 0
@@ -94,14 +99,25 @@ class Game:
                     print("Invalid action performed!")
             self._draw_state(new_state)
             if new_state in states:
-                stat_dictionary["red_team_moves"] = str(red_team_moves)
-                stat_dictionary["blue_team_moves"] = str(blue_team_moves)
-                stat_dictionary["total_moves"] = str(red_team_moves+blue_team_moves)
+                stat_dictionary["red_team_moves"] = red_team_moves
+                stat_dictionary["blue_team_moves"] = blue_team_moves
+                stat_dictionary["total_moves"] = red_team_moves+blue_team_moves
                 stat_dictionary["won"] = "draw"
-                stat_dictionary["time"] = str(timer() - start_time)
+                stat_dictionary["time"] = timer() - start_time
                 repeated = True
                 print("State has been repeated! Therefore, game is over.")
                 break
+
+            if (red_team_moves+blue_team_moves >= iteration_threshold):
+                stat_dictionary["red_team_moves"] = red_team_moves
+                stat_dictionary["blue_team_moves"] = blue_team_moves
+                stat_dictionary["total_moves"] = red_team_moves+blue_team_moves
+                stat_dictionary["won"] = "exhausted"
+                stat_dictionary["time"] = timer() - start_time
+                repeated = True
+                print("1000 calcuated. Terminate game")
+                break
+
             states += [new_state]
             state = new_state
             end_t = int(round(time.time() * 1000))
@@ -122,17 +138,19 @@ class Game:
                 blue_team_moves += 1 
 
         if (not repeated):
-            stat_dictionary["red_team_moves"] = str(red_team_moves)
-            stat_dictionary["blue_team_moves"] = str(blue_team_moves)
-            stat_dictionary["total_moves"] = str(red_team_moves+blue_team_moves)
+            stat_dictionary["red_team_moves"] = red_team_moves
+            stat_dictionary["blue_team_moves"] = blue_team_moves
+            stat_dictionary["total_moves"] = red_team_moves+blue_team_moves
             stat_dictionary["won"] = str(state.is_terminal)
-            stat_dictionary["time"] = str(timer() - start_time)
-            print()
+            stat_dictionary["time"] = timer() - start_time
+            print('Finished game')
 
         for player_id, agent in enumerate(self.agents):
             agent.learn(states, player_id)
 
         pygame.time.wait(round_wait)
+
+        return stat_dictionary
 
     def _draw_state(self, state):
         if self.display:

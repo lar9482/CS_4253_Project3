@@ -8,7 +8,7 @@
             "name": "Python: Current File",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/src/projects/proj2/main.py",
+            "program": "${workspaceFolder}/src/projects/proj2/run_tests.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
