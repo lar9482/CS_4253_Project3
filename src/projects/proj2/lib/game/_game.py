@@ -76,7 +76,7 @@ class Game:
         repeated = False
         start_time = timer()
 
-        iteration_threshold = 1000
+        iteration_threshold = 200
 
         if speed == 2:
             turn_wait = 0
