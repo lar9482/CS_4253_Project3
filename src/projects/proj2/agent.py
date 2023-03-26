@@ -280,13 +280,16 @@ class MonteCarloAgent(RandomAgent):
 
         #Keep track of the current state and previously seen states.
         curr_state = child.state
+        state_threshold = 250
+        num_states = 0
         if (curr_state.is_terminal != None):
             print()
         #Loop until the state is terminal or has been repeated.
         while (True):
             
             #Checking if the passed in state is terminal or not.
-            if (curr_state.is_terminal != None):
+            if (curr_state.is_terminal != None or
+                num_states >= state_threshold):
                 break
             #Track the resultant state that has the maximium evaluation
             #according to the playout policy
@@ -313,6 +316,7 @@ class MonteCarloAgent(RandomAgent):
 
             #Append result state to be tested for repeating states later
             curr_state = result_state
+            num_states += 1
             
         return (self.evaluate(curr_state, curr_state.current_player), curr_state)
     
