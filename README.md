@@ -1,30 +1,15 @@
-# CS-4253: Artificial Intelligence
+# 3rd project from CS 4253-01
+Introduction to Artificial Intelligence.
 
-Code for the AI projects for CS-4253.
+Taught by [Dr. Sandip Sen](https://engineering.utulsa.edu/computer-science/faculty/profile/sandip-sen/) at the University of Tulsa in SP 23.
 
-## Requirements
+This repository implements the following decision techniques to play a discretized soccer game:
+ - Minimax game tree search.
+ - Minimax game tree search with $\alpha$ - $\beta$ pruning.
+ - Monte Carlo game tree search.
 
-All projects use Python 3. You will need to install some other
-dependencies as well. To do so, run (assuming you are using a Ubuntu
-system)
+The goal of this project was to compare the advantages and disadvantages of these algorithms with the soccer game domain.
 
-    sudo pip3 install -r requirements.txt
+This repository is a fork of a discretized soccer game written by the TU MASTERS group. [[1]](https://github.com/TUmasters/cs4253).
 
-in the root of the folder. If you are on another system, it should be
-some variant of `pip install -r requirements.txt`.
-
-You will need Tkinter for Python 3 to use the pygame packages. On
-Ubuntu, this can be installed by running
-
-    sudo apt-get install python3-tkinter
-
-in the command line.
-
-## Running Evaluations
-
-The tool `evaluate.py` at the root of this direction can be run using
-
-    python3 evaluate.py <project>
-
-This will automatically run the evaluation code against a project. For
-the list of projects, see [src/projects](src/projects).
+For more information, please see __info__
