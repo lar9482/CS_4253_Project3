@@ -87,9 +87,8 @@ def set_up_game_and_run(search_method,
     lock.release()
 
 
-search_methods = ['prune', 'monte_carlo']
-# search_methods = ['minimax', 'prune', 'monte_carlo']
-max_depths = [1, 2, 3, 4]
+search_methods = ['minimax', 'prune', 'monte_carlo']
+max_depths = [1, 2, 3, 4, 5]
 max_playouts = [10, 25, 50, 75, 100]
 
 num_tests = 25

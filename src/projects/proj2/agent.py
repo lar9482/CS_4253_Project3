@@ -282,8 +282,6 @@ class MonteCarloAgent(RandomAgent):
         curr_state = child.state
         state_threshold = 250
         num_states = 0
-        if (curr_state.is_terminal != None):
-            print()
         #Loop until the state is terminal or has been repeated.
         while (True):
             
