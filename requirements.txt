@@ -1,2 +1,0 @@
-pygame>=1.9.3,<2.0
-pyrsistent==0.14.0
