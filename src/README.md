@@ -6,16 +6,16 @@ I modified the files:
     - Contains code for the Minimax, Minimax with $\alpha$ - $\beta$ pruning, and Monte Carlo Tree Search agents.
     
 * evaluation.py
-    - Contains my utility function for evaluation of the game state(see my report for more info)
+    - Contains my utility function for evaluation of the game state(see my report for more info).
     
 * run_tests.py
-    - Contains code where I ran some automated tests of the game
+    - Contains code where I ran automated tests of the game.
     
 * MCTS/node.py
-    - Contains helper class where serves as a 'node' for Monte Carlo Search Tree
+    - Contains helper class where serves as a 'node' for Monte Carlo Search Tree.
     
 * file_io.py
-    - Contains function for saving statistics into an excel file of my choosing
+    - Contains function for saving statistics into an excel file of my choosing.
     
 * lib/game/_game.py
     - Modified _run_round function to collect statistics from the game after each turn.
